@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Neuro PT GSS Lab</title>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            /* Deep Navy */
+            --secondary-color: #4a5568;
+            /* Grey */
+            --background-color: #f0f2f5;
+            /* Light Gray */
+            --chart-bg: #ffffff;
+            --success-color: #2f855a;
+            --error-color: #c53030;
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+            --accent-color: #3182ce;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background-color: var(--chart-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-bottom: 5px solid #2c5282;
+            position: relative;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        main {
+            padding: 24px;
+            flex-grow: 1;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            background-color: #2a4365;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #e2e8f0;
+            color: var(--text-color);
+            font-weight: 500;
+            text-align: left;
+            padding: 12px 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background-color: #f7fafc;
+            border-color: #cbd5e0;
+            transform: translateX(4px);
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Diagnosis Badge */
+        .diagnosis-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .diagnosis-badge {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            padding: 8px 24px;
+            border-radius: 99px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 4px 6px rgba(50, 130, 200, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Case Box */
+        .chart-box {
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .chart-header {
+            background-color: var(--primary-color);
+            padding: 8px 16px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-content {
+            padding: 20px;
+        }
+
+        .info-row {
+            margin-bottom: 16px;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 800;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .info-text {
+            font-size: 1.05rem;
+            color: #2d3748;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .options-grid button {
+            text-align: left;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        /* Feedback */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 8px;
+            background-color: #f0fff4;
+            border-left: 5px solid #48bb78;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: none;
+        }
+
+        .feedback-area.error {
+            background-color: #fff5f5;
+            border-left-color: #f56565;
+        }
+
+        .feedback-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            background-color: #edf2f7;
+            border-radius: 999px;
+            height: 10px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background-color: var(--accent-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Clinical Neuro PT GSS Lab</h1>
+            <p>신경계물리치료중재실습</p>
+        </header>
+
+        <main>
+            <!-- Start Screen -->
+            <div id="start-screen" class="screen active">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img src="./professor_sim.png" alt="Professor Sim"
+                        style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid var(--primary-color); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+                <div class="professor-msg"
+                    style="background-color: #f7fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <strong>안산대학교 물리치료학과 심경섭 교수:</strong>
+                    <p>"국가고시 대비 5지 선다형 문제입니다. 임상적 근거에 기반한 정확한 중재를 선택해 보세요."</p>
+                </div>
+                <div class="intro-box">
+                    <button class="btn" onclick="game.startGame()">실전 모의고사 시작 (무작위 10문제)</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" class="screen">
+                <div class="progress-container">
+                    <span id="case-number">Case 1/10</span>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="diagnosis-section">
+                    <div id="diagnosis-badge" class="diagnosis-badge">
+                        <!-- Diagnosis Text Injected Here -->
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <span>MEDICAL CHART</span>
+                    </div>
+                    <div class="chart-content">
+                        <div class="info-row">
+                            <span class="info-label">Patient History & Symptoms (주호소)</span>
+                            <div id="p-symptoms" class="info-text">...</div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Therapeutic Goal (치료 목표)</span>
+                            <div id="p-goal" class="info-text">...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="assessment-area">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; color: var(--primary-color);">Q. 가장 적절한 중재 방법은?
+                    </h3>
+                    <div id="options-container" class="options-grid">
+                        <!-- Options injected here -->
+                    </div>
+                </div>
+
+                <div id="feedback-area" class="feedback-area">
+                    <div id="feedback-title" class="feedback-title"></div>
+                    <p id="feedback-text" style="color: #2d3748; margin-bottom: 20px;"></p>
+                    <button id="next-btn" class="btn" onclick="game.nextStage()">다음 문제 →</button>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result-screen" class="screen">
+                <div class="result-card">
+                    <h2 style="color: var(--primary-color); margin-top: 0;">📝 실습 결과 리포트</h2>
+
+                    <div class="score-display" style="font-size: 4rem; color: var(--accent-color); margin: 30px 0;">
+                        <span id="final-score">0</span><span style="font-size: 2rem;">점</span>
+                    </div>
+
+                    <div id="final-grade" class="grade-badge"
+                        style="font-size: 1.5rem; padding: 10px 30px; margin-bottom: 30px; background: #eee; border-radius: 99px; display: inline-block; font-weight: bold;">
+                        Grade Computing...
+                    </div>
+
+                    <p id="result-message"
+                        style="font-size: 1.1rem; margin-bottom: 40px; line-height: 1.8; color: #4a5568;"></p>
+
+                    <button class="btn" onclick="game.restartGame()">새로운 문제 세트로 다시 풀기</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /**
+         * Game Data - 30 High-Yield Clinical Scenarios
+         */
+        const scenarioData = [
+            // ==========================================
+            // 1. STROKE (Hemiplegia) - 8 Cases
+            // ==========================================
+            {
+                id: "stroke_1",
+                category: "Stroke (Hemiplegia)",
+                symptoms: "발병 3주차, 앉은 자세에서 정적 균형을 잡지 못하고 마비측으로 쓰러지려 한다. (Trunk Hypotonia)",
+                goal: "앉은 자세에서의 안정성(Stability) 증진",
+                options: [
+                    "1. 동적 반전 (Dynamic Reversals)",
+                    "2. 등장성 수축의 결합 (Combination of Isotonics)",
+                    "3. 안정화 반전 (Stabilizing Reversals)",
+                    "4. 리드미컬한 회전 (Rhythmic Rotation)",
+                    "5. 반복 수축 (Repeated Contractions)"
+                ],
+                correctIndex: 2,
+                explanation: "초기 안정성(Stability) 단계에서는 움직임 없이 등척성 수축을 통해 자세 유지근을 강화하는 <strong>'안정화 반전(Stabilizing Reversals)'</strong> 또는 '율동적 안정화'가 필요합니다."
+            },
+            {
+                id: "stroke_2",
+                category: "Stroke (Hemiplegia)",
+                symptoms: "보행 시 마비측 하지의 협응이 부족하여 발을 끄는 현상이 나타난다. 근력은 Fair(3등급) 이상이다.",
+                goal: "협응력 증진 및 보행 주기 조절 (Controlled Mobility)",
+                options: [
+                    "1. 유지-이완 (Hold-Relax)",
+                    "2. 동적 반전 (Dynamic Reversals)",
+                    "3. 율동적 개시 (Rhythmic Initiation)",
+                    "4. 수축-이완 (Contract-Relax)",
+                    "5. 율동적 안정화 (Rhythmic Stabilization)"
+                ],
+                correctIndex: 1,
+                explanation: "협응력(Coordination) 증진을 위해서는 주동근과 길항근을 교대로 수축시키며 움직임의 방향을 전환하는 <strong>'동적 반전(Dynamic Reversals)'</strong>이 가장 효과적입니다."
+            },
+            {
+                id: "stroke_3",
+                category: "Stroke (Hemiplegia)",
+                symptoms: "팔을 굽힘 패턴으로 들어올릴 때 끝범위(End-range)에서 힘이 빠져 동작을 완성하지 못한다.",
+                goal: "가동성(Mobility) - 근력 강화 및 운동 학습",
+                options: [
+                    "1. 반복 수축 (Repeated Contractions)",
+                    "2. 율동적 안정화 (Rhythmic Stabilization)",
+                    "3. 정상 타이밍 (Normal Timing)",
+                    "4. 수축-이완 (Contract-Relax)",
+                    "5. 유지-이완 (Hold-Relax)"
+                ],
+                correctIndex: 0,
+                explanation: "동작 수행 중 약화된 지점이나 범위에서 반복적인 신장(Stretch)과 저항을 주어 근수축을 유도하는 <strong>'반복 수축(Repeated Contractions)'</strong>이 적합합니다."
+            },
+            {
+                id: "stroke_4",
+                category: "Stroke (Brunnstrom)",
+                symptoms: "Brunnstrom Recovery Stage 3 환자. 경직이 심하고 공동운동(Synergy) 패턴이 우세하게 나타난다.",
+                goal: "공동운동 패턴 탈피 및 분리 운동 유도",
+                options: [
+                    "1. 건측을 이용한 저항 운동으로 연합 반응 유발",
+                    "2. 빠르고 강한 신장 자극",
+                    "3. 공동운동 패턴 내에서의 등척성 수축",
+                    "4. 경직 완화를 위한 율동적 회전(Rhythmic Rotation) 후 분리 운동",
+                    "5. 고강도 플라이오메트릭 훈련"
+                ],
+                correctIndex: 3,
+                explanation: "Stage 3의 강한 경직을 이완시키기 위해 <strong>'율동적 회전'</strong> 등의 이완 기법을 먼저 적용하고, 이후 공동운동을 벗어나는 분리 운동을 시도해야 합니다."
+            },
+            {
+                id: "stroke_5",
+                category: "Stroke (Pusher Syn.)",
+                symptoms: "우측 뇌손상 환자가 앉은 자세에서 자꾸 마비측(왼쪽)으로 밀며 쓰러지려 한다. (Pusher Syndrome)",
+                goal: "정중선(Midline) 인식 및 수직 정위",
+                options: [
+                    "1. 치료사가 환자를 건측으로 강하게 밀어준다.",
+                    "2. 마비측 팔꿈치를 바닥에 대고 체중을 지지하게 한다.",
+                    "3. 시각적 단서(거울)를 이용해 스스로 정중선을 찾게 한다.",
+                    "4. 눈을 감고 전정 감각 훈련을 한다.",
+                    "5. 건측 손으로 침대 난간을 잡게 하여 마비측으로 더 기울이게 한다."
+                ],
+                correctIndex: 2,
+                explanation: "푸셔 증후군 환자는 자신의 기울어진 자세를 수직으로 착각합니다. <strong>'시각적 피드백(거울, 수직선)'</strong>을 이용하여 스스로 오류를 수정하게 해야 합니다. 억지로 밀면 저항이 더 심해집니다."
+            },
+            {
+                id: "stroke_6",
+                category: "Stroke (Neglect)",
+                symptoms: "좌측 편마비 환자가 왼쪽 물건을 무시하고, 고개가 오른쪽으로만 돌아가 있다. (Neglect)",
+                goal: "환측(왼쪽)에 대한 인지 향상",
+                options: [
+                    "1. 모든 물건을 환자의 오른쪽에 배치한다.",
+                    "2. 침대를 배치할 때 환자의 오른쪽이 입구를 향하게 한다.",
+                    "3. 치료사가 환자의 왼쪽에서 접근하여 말을 걸고 자극을 준다.",
+                    "4. 환자의 오른쪽 팔다리만 집중적으로 운동시킨다.",
+                    "5. 휠체어를 탈 때 오른쪽 브레이크만 잠그게 한다."
+                ],
+                correctIndex: 2,
+                explanation: "편측 무시 환자에게는 <strong>'환측(왼쪽)'</strong>에서 강한 감각적, 청각적 자극을 주어 주의를 환기시켜야 합니다."
+            },
+            {
+                id: "stroke_7",
+                category: "Stroke (Gait)",
+                symptoms: "보행 입각기(Stance phase)에 무릎이 과신전(Back knee) 되는 현상이 나타난다.",
+                goal: "무릎 조절 능력 및 햄스트링/전경골근 조절",
+                options: [
+                    "1. 대퇴사두근의 강한 등척성 운동만 실시",
+                    "2. 발목을 저측굴곡(Plantarflextion) 시켜 고정",
+                    "3. 슬관절 약간 굴곡 상태에서의 등척성/등장성 조절 훈련",
+                    "4. 무릎을 완전히 펴는 훈련 집중",
+                    "5. 고관절을 굴곡시키는 훈련만 실시"
+                ],
+                correctIndex: 2,
+                explanation: "Back knee(Genu Recurvatum)를 교정하기 위해서는 무릎을 약간 구부린 상태(약 5~10도)에서 버티는 <strong>조절 훈련</strong>이 필요합니다."
+            },
+            {
+                id: "stroke_8",
+                category: "Stroke (Upper Ext.)",
+                symptoms: "어깨 아탈구(Subluxation)가 있는 환자. 통증은 없으나 극상근(Supraspinatus)이 위축되어 있다.",
+                goal: "어깨 관절 안정성 확보",
+                options: [
+                    "1. 팔을 아래로 강하게 당기는 견인(Traction)",
+                    "2. 팔걸이(Arm sling)를 하루 종일 착용",
+                    "3. 관절 압박(Approximation)을 동반한 안정화 운동",
+                    "4. 어깨 관절의 큰 범위 회전 운동",
+                    "5. 무거운 아령 들기"
+                ],
+                correctIndex: 2,
+                explanation: "아탈구된 어깨 관절을 제 위치로 리포지셔닝하고, 관절 수용기를 자극하기 위해 <strong>'압박(Approximation)'</strong>을 적용하며 안정화 운동을 해야 합니다."
+            },
+
+            // ==========================================
+            // 2. PARKINSON'S DISEASE - 5 Cases
+            // ==========================================
+            {
+                id: "pd_1",
+                category: "Parkinson's Disease",
+                symptoms: "파킨슨병 환자가 의자에 앉아 있다가 일어서려 할 때, 몸이 굳어 움직임을 시작하지 못한다. (Akinesia/Freezing)",
+                goal: "움직임 시작(Initiation) 촉진",
+                options: [
+                    "1. 율동적 안정화 (Rhythmic Stabilization)",
+                    "2. 율동적 개시 (Rhythmic Initiation)",
+                    "3. 안정화 반전 (Stabilizing Reversals)",
+                    "4. 반복 수축 (Repeated Contractions)",
+                    "5. 정상 타이밍 (Normal Timing)"
+                ],
+                correctIndex: 1,
+                explanation: "운동 불능이나 동결 현상에는 '수동->능동보조->능동->저항' 순으로 진행하는 <strong>'율동적 개시'</strong>가 가장 적합합니다."
+            },
+            {
+                id: "pd_2",
+                category: "Parkinson's Disease",
+                symptoms: "파킨슨병 환자의 굽은 등(Kyphosis)으로 인해 가동범위가 제한되고, 환자가 어깨 통증을 호소한다.",
+                goal: "통증 없는 범위 내 가동성 증진",
+                options: [
+                    "1. 유지-이완 (Hold-Relax)",
+                    "2. 수축-이완 (Contract-Relax)",
+                    "3. 율동적 안정화 (Rhythmic Stabilization)",
+                    "4. 타이밍 훈련 (Timing for Emphasis)",
+                    "5. 파워 스트레칭"
+                ],
+                correctIndex: 0,
+                explanation: "가동범위 제한과 '통증'이 동반된 경우, 등척성 수축을 이용한 <strong>'유지-이완(Hold-Relax)'</strong>이 가장 안전합니다. (수축-이완은 통증이 없을 때 사용)"
+            },
+            {
+                id: "pd_3",
+                category: "Parkinson's Disease",
+                symptoms: "보행 시 방향을 바꿀 때(Turning) 균형을 잃고 비틀거린다.",
+                goal: "동적 균형 및 방향 전환 능력 개선",
+                options: [
+                    "1. 율동적 안정화 (Rhythmic Stabilization)",
+                    "2. 동적 반전 (Dynamic Reversals) 및 브레이딩(Braiding)",
+                    "3. 등장성 수축의 결합 (Combination of Isotonics)",
+                    "4. 복제 (Replication)",
+                    "5. 유지-이완 (Hold-Relax)"
+                ],
+                correctIndex: 1,
+                explanation: "방향 전환과 신체 회전 능력을 키우기 위해, 다리를 교차하며 걷는 <strong>'Braiding'</strong>이나 <strong>'동적 반전'</strong> 훈련이 효과적입니다."
+            },
+            {
+                id: "pd_4",
+                category: "Parkinson's Disease",
+                symptoms: "무표정한 얼굴(Masked face)과 작은 목소리, 음식을 삼키기 어려워한다.",
+                goal: "얼굴 및 구강 기능 증진",
+                options: [
+                    "1. 얼굴 근육 PNF 및 호흡/발성 훈련",
+                    "2. 경추 견인 치료",
+                    "3. 침묵 요법(Voice Rest)",
+                    "4. 유동식 섭취만 권장",
+                    "5. 얼굴 근육 냉찜질"
+                ],
+                correctIndex: 0,
+                explanation: "파킨슨병 환자의 얼굴 근육 강직과 삼킴 곤란 개선을 위해, 얼굴 PNF 기법과 함께 '아-에-이-오-우' 등의 <strong>발성 및 호흡 훈련</strong>을 병행해야 합니다."
+            },
+            {
+                id: "pd_5",
+                category: "Parkinson's Disease",
+                symptoms: "보행 시 보폭이 좁고 종종걸음(Festinating Gait)을 걷는다.",
+                goal: "보폭 증가 및 보행 리듬 개선",
+                options: [
+                    "1. 바닥에 일정한 간격의 시각적 표시(Visual Cue) 사용",
+                    "2. 환자의 팔을 잡고 빠르게 끌어준다.",
+                    "3. 러닝머신에서 고속 보행 훈련",
+                    "4. 발목에 모래주머니 착용",
+                    "5. 좁은 통로 걷기 훈련"
+                ],
+                correctIndex: 0,
+                explanation: "파킨슨병 환자의 보행 동결 및 종종걸음 개선에는 바닥의 선이나 메트로놈 박자 같은 <strong>'시각적/청각적 외부 단서(External Cue)'</strong>가 매우 효과적입니다."
+            },
+
+            // ==========================================
+            // 3. SCI (Spinal Cord Injury) - 6 Cases
+            // ==========================================
+            {
+                id: "sci_1",
+                category: "SCI (C6 Complete)",
+                symptoms: "C6 완전 마비 환자. 손목 폄근(Radial wrist extensor) 근력은 3등급(Fair) 이다.",
+                goal: "Tenodesis Grip(건고정 잡기) 기능 획득",
+                options: [
+                    "1. 손가락 굽힘근의 과도한 신장(Stretching)",
+                    "2. 손목 폄근(Extensor) 강화 및 손가락 굽힘근 단축 유도",
+                    "3. 손목 굽힘근 강화 운동",
+                    "4. 손가락 폄근 강화 운동",
+                    "5. 모든 손가락 관절의 유연성 증대"
+                ],
+                correctIndex: 1,
+                explanation: "C6 환자는 손목을 뒤로 젖힐 때 손가락이 구부러지는 <strong>Tenodesis 작용</strong>을 이용해 물건을 잡아야 합니다. 따라서 손가락 굽힘근이 약간 단축되도록(Tightness) 유지해야 합니다."
+            },
+
+            // ==========================================
+            // 4. NEW ADDITIONS (from Neuro PT Guide)
+            // ==========================================
+            {
+                id: "ms_1",
+                category: "Multiple Sclerosis (MS)",
+                symptoms: "다발성 경화증 환자가 더운 날씨에 야외 운동 후 시력이 흐려지고 피로감이 급격히 심해졌다. (Uhthoff's Phenomenon)",
+                goal: "증상 악화 방지 및 피로 관리",
+                options: [
+                    "1. 고강도 인터벌 트레이닝으로 체력 증진",
+                    "2. 따뜻한 온열 치료(Hot pack)로 근육 이완",
+                    "3. 시원한 환경에서 휴식 및 운동 강도 조절",
+                    "4. 즉시 고용량 스테로이드 투여",
+                    "5. 선글라스 착용 후 계속 운동"
+                ],
+                correctIndex: 2,
+                explanation: "다발성 경화증의 '우토프 징후(Uhthoff's sign)'는 체온 상승 시 신경 전도 속도가 느려져 증상이 악화되는 현상입니다. 따라서 <strong>시원한 환경</strong> 유지와 피로 관리가 핵심입니다."
+            },
+            {
+                id: "ms_2",
+                category: "Multiple Sclerosis (MS)",
+                symptoms: "다발성 경화증 환자의 보행 능력을 유지하고자 한다. 환자는 쉽게 피로를 느낀다.",
+                goal: "에너지 보존 및 기능 유지",
+                options: [
+                    "1. 탈진할 때까지 걷기 훈련",
+                    "2. 아침 시간대, 시원한 수중 운동(Pool Therapy)",
+                    "3. 뜨거운 물에서의 수중 운동",
+                    "4. 모래주머니를 차고 등산",
+                    "5. 낮잠 금지 및 활동량 최대화"
+                ],
+                correctIndex: 1,
+                explanation: "수중 운동은 체온 상승을 막아주어 MS 환자에게 효과적입니다. 단, 물이 너무 따뜻하면 안 되며, <strong>피로가 덜한 아침 시간대</strong>가 좋습니다."
+            },
+            {
+                id: "cp_1",
+                category: "Cerebral Palsy (Spastic)",
+                symptoms: "경직형 양하지마비(Spastic Diplegia) 아동. 다리가 뻣뻣하고 가위 보행(Scissoring Gait)을 보인다.",
+                goal: "비정상 반사 억제 및 정상 움직임 촉진 (NDT)",
+                options: [
+                    "1. 하지의 강한 신전근 강화 운동",
+                    "2. Key Point 조절을 통한 경직 억제 및 분리 운동 유도",
+                    "3. 보행 보조기 없이 걷기 강요",
+                    "4. 점프 훈련으로 순발력 강화",
+                    "5. 발목에 무거운 모래주머니 착용"
+                ],
+                correctIndex: 1,
+                explanation: "신경발달치료(NDT/Bobath)의 핵심은 <strong>Key Point of Control</strong>을 사용하여 비정상적인 경직 패턴을 억제하고 정상적인 움직임을 경험하게 하는 것입니다."
+            },
+            {
+                id: "cp_2",
+                category: "Cerebral Palsy (GMFCS)",
+                symptoms: "뇌성마비 아동 평가: 휠체어를 이용해야만 이동이 가능하며, 머리 가누기가 어렵다.",
+                goal: "GMFCS 레벨에 따른 적절한 목표 설정",
+                options: [
+                    "1. GMFCS Level I - 독립 보행 목표",
+                    "2. GMFCS Level III - 보조도구 이용하여 걷기",
+                    "3. GMFCS Level V - 편안한 자세 유지 및 이동 보조",
+                    "4. GMFCS Level II - 제한적인 실외 보행",
+                    "5. 정상 발달 아동과 동일한 목표"
+                ],
+                correctIndex: 2,
+                explanation: "스스로 머리 가누기가 어렵고 휠체어 의존적인 상태는 가장 중증인 <strong>GMFCS Level V</strong>에 해당하며, 치료 목표는 편안한 자세 유지와 욕창 예방 등 삶의 질 향상에 맞추어야 합니다."
+            },
+            {
+                id: "tabes_1",
+                category: "Tabes Dorsalis (척수매독)",
+                symptoms: "눈을 감으면 균형을 잃고 비틀거리며(Romberg 양성), 걸을 때 발을 쿵쿵 찍는 도장족 보행(Stamping gait)을 보인다.",
+                goal: "감각성 실조(Sensory Ataxia) 중재",
+                options: [
+                    "1. 프렌켈 운동 (Frenkel's Exercises)",
+                    "2. 눈을 감고 걷는 훈련 집중",
+                    "3. 발바닥 감각 둔화 훈련",
+                    "4. 고강도 플라이오메트릭 점프",
+                    "5. 보청기 착용"
+                ],
+                correctIndex: 0,
+                explanation: "척수 뒤기둥(Dorsal Column) 손상으로 고유수용성 감각이 소실된 환자는 시각 정보로 감각을 보상하는 <strong>'프렌켈 운동'</strong>이 필수적입니다."
+            },
+            {
+                id: "syrinx_1",
+                category: "Syringomyelia (척수물구멍증)",
+                symptoms: "어깨와 팔 부위에 '망토 모양(Cape-like)'으로 통증과 온도 감각이 소실되었다.",
+                goal: "환자 교육 및 2차 손상 예방",
+                options: [
+                    "1. 뜨거운 찜질(Hot pack)로 통증 완화",
+                    "2. 감각이 없는 부위의 화상 및 상처 주의 교육",
+                    "3. 목 부위의 강한 견인 치료",
+                    "4. 무거운 물건 들기 훈련",
+                    "5. 통증 부위의 강한 마사지"
+                ],
+                correctIndex: 1,
+                explanation: "척수 중심부 병변으로 통증/온도 감각만 선택적으로 소실(해리성 감각장애)되므로, <strong>화상이나 베임 등의 상처</strong>를 입지 않도록 철저히 교육해야 합니다."
+            },
+            {
+                id: "hun_1",
+                category: "Huntington's Disease",
+                symptoms: "자신의 의지와 상관없이 팔다리가 춤추듯 움직이는 무도증(Chorea)이 나타난다.",
+                goal: "초기 단계의 기능 유지",
+                options: [
+                    "1. 강한 구속복 착용으로 움직임 억제",
+                    "2. 낙상 예방을 위한 균형 훈련 및 코어 안정화",
+                    "3. 도파민 작용제 투여 (파킨슨병 약물)",
+                    "4. 침상 안정만 유도",
+                    "5. 빠른 속도의 민첩성 훈련"
+                ],
+                correctIndex: 1,
+                explanation: "헌팅턴병 초기에는 불수의적 움직임으로 인한 <strong>낙상 위험</strong>이 크므로 균형 및 안정화 운동이 중요합니다. (파킨슨병과 기전이 반대이므로 도파민 투여는 증상을 악화시킬 수 있음)"
+            },
+            {
+                id: "cmt_1",
+                category: "Charcot-Marie-Tooth (CMT)",
+                symptoms: "유전성 말초신경병증으로 발의 아치가 높고(Opes cavus), 종아리 근육 위축으로 '샴페인 병' 모양의 다리를 보인다.",
+                goal: "보행 보조 및 변형 관리",
+                options: [
+                    "1. 발목 족배굴곡 보조기(AFO) 착용 및 스트레칭",
+                    "2. 발바닥 아치를 낮추는 수술",
+                    "3. 종아리 근육 강화만 집중",
+                    "4. 휠체어 생활 권장",
+                    "5. 발가락 굽힘근 강화"
+                ],
+                correctIndex: 0,
+                explanation: "CMT 환자는 발목 들어올리기(Dorsiflexion) 약화로 풋드랍(Foot drop)이 발생하므로 <strong>AFO 보조기</strong> 착용과 아킬레스건 단축 방지를 위한 스트레칭이 필요합니다."
+            },
+            {
+                id: "als_2",
+                category: "ALS (Lou Gehrig's)",
+                symptoms: "ALS 환자가 호흡 곤란을 호소하며, 기침 힘이 약해 가래 배출이 어렵다.",
+                goal: "호흡 기능 보조",
+                options: [
+                    "1. 기계적 기침 유발 보조(Cough Assist) 및 호흡 재활",
+                    "2. 산소 농도를 최대한 높여서 공급",
+                    "3. 흉곽 압박 금지",
+                    "4. 복식 호흡 금지",
+                    "5. 최대한 빠르게 호흡하도록 유도"
+                ],
+                correctIndex: 0,
+                explanation: "호흡근 약화로 인한 가래 축적은 폐렴으로 이어질 수 있어, <strong>기침 유발 보조</strong>나 흉곽 가동성 운동 등 적극적인 호흡 재확이 생명 유지에 중요합니다."
+            },
+
+            // ==========================================
+            // 5. BONUS EXPANSION (Targeting 50 Questions)
+            // ==========================================
+            {
+                id: "sb_1",
+                category: "Spina Bifida (척추갈림증)",
+                symptoms: "L4 수준의 척수수막류(Myelomeningocele) 아동. 수술 후 엎드린 자세(Prone)를 유지하고 있다.",
+                goal: "이차적 변형 예방 및 관리",
+                options: [
+                    "1. 고관절 굴곡 구축(Hip Flexion Contracture) 주의",
+                    "2. 발목 배측굴곡(Dorsiflexion) 구축 주의",
+                    "3. 무릎 과신전(Back knee) 주의",
+                    "4. 고관절 내전(Adduction) 구축 주의",
+                    "5. 요추 전만(Lordosis) 감소 주의"
+                ],
+                correctIndex: 0,
+                explanation: "엎드린 자세(Prone)를 장시간 유지하면 고관절 굴곡근이 단축될 위험이 큽니다. 따라서 <strong>고관절 굴곡 구축</strong> 예방을 위한 스트레칭과 자세 관리가 중요합니다."
+            },
+            {
+                id: "bell_1",
+                category: "Facial Nerve (Bell's Palsy)",
+                symptoms: "우측 안면 마비 환자. '이마 주름 잡기'가 불가능하고, 눈이 감기지 않는다.",
+                goal: "중추성(Central) vs 말초성(Peripheral) 감별",
+                options: [
+                    "1. 중추성 마비 (뇌졸중 의심)",
+                    "2. 말초성 마비 (Bell's Palsy)",
+                    "3. 삼차신경통",
+                    "4. 뇌종양",
+                    "5. 파킨슨병 안면 마비"
+                ],
+                correctIndex: 1,
+                explanation: "이마 주름을 잡을 수 **없다면** 말초성(Peripheral)인 Bell's palsy입니다. (중추성인 경우 양쪽 뇌의 지배를 받아 이마 주름 잡기가 가능함)"
+            },
+            {
+                id: "dmd_1",
+                category: "Duchenne MD",
+                symptoms: "5세 남아. 바닥에서 일어날 때 손으로 무릎과 허벅지를 짚으며 기어오르듯 일어난다. (Gower's Sign)",
+                goal: "특징적 징후의 원인 파악",
+                options: [
+                    "1. 엉덩관절 펴짐근(Hip Extensor) 및 대퇴사두근 약화",
+                    "2. 척추 기립근의 강직",
+                    "3. 상지 근육의 마비",
+                    "4. 소뇌 실조로 인한 균형 장애",
+                    "5. 햄스트링 단축"
+                ],
+                correctIndex: 0,
+                explanation: "가우어 징후(Gower's sign)는 골반대 및 하지 <strong>근위부 근력(특히 Hip extensors) 약화</strong>로 인해 상지를 이용해 보상적으로 일어나는 현상입니다."
+            },
+            {
+                id: "sci_7",
+                category: "SCI (Brown-Sequard)",
+                symptoms: "척수 반쪽 절단(Hemisection). 손상 측의 운동 마비와 위치감각 소실, 반대 측의 통증/온도 감각 소실이 나타난다.",
+                goal: "브라운-세카르 증후군 이해",
+                options: [
+                    "1. 손상 측 다리의 뜨거운 찜질 금지 (감각 소실)",
+                    "2. 반대 측 다리의 뜨거운 찜질 금지 (감각 소실)",
+                    "3. 양쪽 다리 모두 온각 소실",
+                    "4. 상지의 완전 마비",
+                    "5. 호흡근 마비"
+                ],
+                correctIndex: 1,
+                explanation: "브라운-세카르 증후군에서 통증/온도 감각(Spinothalamic tract)은 교차하여 올라가므로 <strong>손상 반대 측</strong>에서 소실됩니다. 따라서 반대 측 다리에 화상을 주의해야 합니다."
+            },
+            {
+                id: "sci_8",
+                category: "SCI (Anterior Cord)",
+                symptoms: "척수 전방 동맥 손상. 운동 기능과 통증/온도 감각은 소실되었으나, 고유수용성 감각은 보존되었다.",
+                goal: "전방 척수 증후군 중재",
+                options: [
+                    "1. 시각적 보상 훈련 필수 (고유감각 소실 때문)",
+                    "2. 남겨진 고유수용성 감각을 활용한 움직임 조절",
+                    "3. 프렌켈 운동 적용",
+                    "4. 찬물을 이용한 감각 자극",
+                    "5. 침상 안정이 최우선"
+                ],
+                correctIndex: 1,
+                explanation: "전방 척수 증후군은 뒤기둥(Dorsal Column)이 보존되므로, 살아있는 <strong>고유수용성 감각(위치 감각)</strong>을 적극 활용하여 재활을 진행해야 합니다."
+            },
+            {
+                id: "sci_9",
+                category: "SCI (Cauda Equina)",
+                symptoms: "L1 이하 말초신경 손상. 다리의 이완성 마비와 방광/대장 무반사(Areflexic)가 특징이다.",
+                goal: "배뇨/배변 훈련 교육",
+                options: [
+                    "1. 반사성 배뇨(Reflex voiding) 유도",
+                    "2. 발살바법(Valsalva) 또는 둔부 압박 배뇨",
+                    "3. 간헐적 도뇨관 삽입 불필요",
+                    "4. 수분 섭취 제한",
+                    "5. 전기 자극 배뇨"
+                ],
+                correctIndex: 1,
+                explanation: "말초신경 손상인 마미 증후군(Cauda Equina)은 방광 반사가 없으므로, 복압을 높이는 <strong>발살바법</strong>이나 손으로 눌러서 배출하는 방법을 교육해야 합니다."
+            },
+            {
+                id: "pnf_le_1",
+                category: "PNF Pattern (LE)",
+                symptoms: "보행 시 유각기(Swing phase)에 발을 끌지 않도록, 고관절 굴곡과 발목 배측굴곡을 강화하고 싶다.",
+                goal: "적절한 하지 PNF 패턴 선택",
+                options: [
+                    "1. D1 Extension (신전-외전-내회전)",
+                    "2. D1 Flexion (굴곡-내전-외회전)",
+                    "3. D2 Extension (신전-내전-외회전)",
+                    "4. D2 Flexion (굴곡-외전-내회전)",
+                    "5. 양쪽 다리 모음 패턴"
+                ],
+                correctIndex: 1,
+                explanation: "보행 시 다리를 들어 올리고 발끝을 당기는 동작은 <strong>D1 Flexion (굴곡-내전-외회전)</strong> 패턴과 가장 유사하여 보행 훈련에 많이 쓰입니다."
+            },
+            {
+                id: "pnf_le_2",
+                category: "PNF Pattern (LE)",
+                symptoms: "육상 허들 선수가 허들을 넘기 위해 다리를 들어 옆으로 벌리는 동작(Abduction)을 강화하고 싶어 한다.",
+                goal: "고관절 굴곡-외전-내회전 패턴 강화",
+                options: [
+                    "1. D1 Flexion (굴곡-내전-외회전)",
+                    "2. D2 Flexion (굴곡-외전-내회전)",
+                    "3. D1 Extension (신전-외전-내회전)",
+                    "4. D2 Extension (신전-내전-외회전)",
+                    "5. Thrust Pattern"
+                ],
+                correctIndex: 1,
+                explanation: "다리를 들어 옆으로 벌리는(허들 넘기, 소변 보는 강아지 자세) 동작은 고관절 **D2 Flexion (굴곡-외전-내회전)** 패턴입니다."
+            },
+            {
+                id: "pnf_le_3",
+                category: "PNF Pattern (LE)",
+                symptoms: "축구 선수가 '인사이드 킥'을 차거나 제기차기를 하는 동작을 강화하고 싶어 한다. (고관절 굴곡+외회전)",
+                goal: "스포츠 동작과 유사한 PNF 패턴",
+                options: [
+                    "1. D2 Flexion (굴곡-외전-내회전)",
+                    "2. D1 Flexion (굴곡-내전-외회전)",
+                    "3. D2 Extension (신전-내전-외회전)",
+                    "4. D1 Extension (신전-외전-내회전)",
+                    "5. Scapula Pattern"
+                ],
+                correctIndex: 1,
+                explanation: "제기차기나 축구 인사이드 킥 동작은 고관절을 굽히며 안쪽으로 모으고 발을 바깥으로 돌리는 <strong>D1 Flexion</strong> 패턴입니다."
+            },
+            {
+                id: "crps_1",
+                category: "CRPS (복합부위통증)",
+                symptoms: "골절 후 기브스를 푼 손에 극심한 통증, 부종, 피부색 변화가 나타나고 스치기만 해도 아파한다.(Allodynia)",
+                goal: "통증 관리 및 감각 정상화",
+                options: [
+                    "1. 아픈 부위를 절대 만지지 않는다.",
+                    "2. 매우 거친 수건으로 강하게 문지른다.",
+                    "3. 부드러운 천에서 거친 천으로 점진적 감각 탈감작(Desensitization)",
+                    "4. 뜨거운 찜질만 30분 적용",
+                    "5. 관절을 석고로 고정하여 움직임 제한"
+                ],
+                correctIndex: 2,
+                explanation: "CRPS의 이질통(Allodynia)을 치료하기 위해서는 부드러운 자극부터 시작하여 점차 강한 자극으로 적응시키는 <strong>'탈감작(Desensitization)'</strong> 치료가 표준입니다."
+            },
+            {
+                id: "torticollis_1",
+                category: "Torticollis (사경)",
+                symptoms: "우측 흉쇄유돌근(SCM) 단축으로 고개가 우측으로 기울고(Side bending), 좌측으로 돌아가(Rotation) 있다.",
+                goal: "단축된 근육 스트레칭 방향",
+                options: [
+                    "1. 우측으로 측굴, 좌측으로 회전 시킨다.",
+                    "2. 좌측으로 측굴, 우측으로 회전 시킨다.",
+                    "3. 고개를 앞으로 푹 숙인다.",
+                    "4. 고개를 뒤로 젖힌다.",
+                    "5. 우측 어깨를 올린다."
+                ],
+                correctIndex: 1,
+                explanation: "우측 SCM을 늘리기 위해서는 근육 작용의 반대 방향, 즉 <strong>좌측으로 측굴(Side bending)</strong> 시키고 <strong>우측으로 회전(Rotation)</strong> 시켜야 합니다."
+            },
+            {
+                id: "stroke_apraxia",
+                category: "Stroke (Apraxia)",
+                symptoms: "편마비 환자에게 '머리 빗으세요'라고 하면 못 하다가, 무의식적으로는 빗질을 한다. (Ideomotor Apraxia)",
+                goal: "실행증 환자 중재 전략",
+                options: [
+                    "1. 복잡한 구두 지시를 내린다.",
+                    "2. 동작을 단계별로 나누어 쪼개서 가르친다.",
+                    "3. '머리 빗으세요'라고 반복해서 말한다.",
+                    "4. 실제 물건(빗)을 쥐어주고 자연스러운 상황을 유도한다.",
+                    "5. 거울을 보며 잘못된 점을 지적한다."
+                ],
+                correctIndex: 3,
+                explanation: "관념운동 실행증 환자는 명령에 의한 수행은 어렵지만, 실제 도구를 주거나 자동적인 상황에서는 수행이 가능하므로 <strong>문맥과 도구</strong>를 활용해야 합니다."
+            },
+            {
+                id: "frozen_shoulder",
+                category: "Adhesive Capsulitis",
+                symptoms: "50세 여성. 어깨의 모든 방향 움직임이 제한되며, 특히 외회전(External Rotation) 제한이 가장 심하다.",
+                goal: "관절낭 패턴(Capsular Pattern) 고려",
+                options: [
+                    "1. 외회전 > 외전 > 내회전 순서로 제한",
+                    "2. 내회전 > 외전 > 외회전 순서로 제한",
+                    "3. 굴곡 제한이 가장 심함",
+                    "4. 신전 제한이 가장 심함",
+                    "5. 모든 방향이 동일하게 제한"
+                ],
+                correctIndex: 0,
+                explanation: "유착성 관절낭염(오십견)의 특징적인 관절낭 패턴은 <strong>외회전(ER) 제한이 가장 심하고</strong>, 그 다음 외전(Abd), 내회전(IR) 순서입니다."
+            },
+            {
+                id: "sci_2",
+                category: "SCI (T12 Complete)",
+                symptoms: "T12 완전 손상 환자. 휠체어에서 침대로 이동(Transfer) 훈련 중이다.",
+                goal: "Scapula Depressor 및 Triceps 강화를 통한 Push-up 능력",
+                options: [
+                    "1. Lift Sprinter Pattern",
+                    "2. Chopping Pattern",
+                    "3. Mass Flexion Pattern",
+                    "4. PNF Scapular Depression & Push-up",
+                    "5. 하지의 수동 관절 운동"
+                ],
+                correctIndex: 3,
+                explanation: "하반신 마비 환자가 엉덩이를 들어 이동하기 위해서는 상지의 힘, 특히 <strong>'어깨 내림근(Depressor)'과 삼두근</strong>의 힘을 이용하여 신체를 들어올리는 능력이 필수적입니다."
+            },
+            {
+                id: "sci_3",
+                category: "SCI (Incomplete)",
+                symptoms: "불완전 손상 환자(ASIA C). 하지의 움직임이 일부 가능하나 협응이 매우 떨어진다.",
+                goal: "매트 위 네발기기 자세 안정화",
+                options: [
+                    "1. 율동적 안정화 (Rhythmic Stabilization)",
+                    "2. 동적 반전 (Dynamic Reversals)",
+                    "3. 반복 수축 (Repeated Contractions)",
+                    "4. 정상 타이밍 (Normal Timing)",
+                    "5. 수축-이완 (Contract-Relax)"
+                ],
+                correctIndex: 0,
+                explanation: "네발기기처럼 체중 지지 자세에서 흔들림을 잡고 안정성을 키우는 데는 <strong>'율동적 안정화'</strong> 기법이 가장 적절합니다."
+            },
+            {
+                id: "sci_4",
+                category: "SCI (Autonomic)",
+                symptoms: "T6 이상 레벨 손상 환자가 물리치료 중 갑자기 심한 두통, 안면 홍조, 고혈압을 호소한다.",
+                goal: "자율신경 반사부전(Autonomic Dysreflexia) 대처",
+                options: [
+                    "1. 즉시 환자를 눕히고 다리를 들어 올린다.",
+                    "2. 즉시 환자를 앉히고(Sitting) 소변 줄 꼬임 등을 확인한다.",
+                    "3. 물을 많이 마시게 한다.",
+                    "4. 계속 운동을 진행하여 땀을 배출시킨다.",
+                    "5. 이불을 덮어 체온을 올린다."
+                ],
+                correctIndex: 1,
+                explanation: "자율신경 반사부전은 응급 상황입니다. 뇌압을 낮추기 위해 **즉시 앉히고(Sitting)**, 방광 팽만(소변줄 막힘) 등의 자극 원인을 찾아 제거해야 합니다."
+            },
+            {
+                id: "sci_5",
+                category: "SCI (C7 Complete)",
+                symptoms: "C7 완전 손상 환자가 휠체어 푸쉬업을 하려고 한다.",
+                goal: "가능한 근육을 최대한 활용한 이동",
+                options: [
+                    "1. 상완이두근(Biceps)만 사용",
+                    "2. 상완삼두근(Triceps)과 광배근(Latissimus Dorsi) 사용",
+                    "3. 손목 폄근만 사용",
+                    "4. 승모근 상부만 사용",
+                    "5. 복근 사용"
+                ],
+                correctIndex: 1,
+                explanation: "C7 레벨의 핵심 기능은 <strong>상완삼두근(Triceps)</strong>의 사용 가능 여부입니다. 이를 통해 팔꿈치를 펴고 휠체어에서 엉덩이를 들어올릴 수 있습니다."
+            },
+            {
+                id: "sci_6",
+                category: "SCI (Spasticity)",
+                symptoms: "척수손상 환자의 하지 경직(Spasticity)이 심해 관절 구축이 우려된다.",
+                goal: "경직 조절 및 유연성 유지",
+                options: [
+                    "1. 빠르고 강한 수동 신장",
+                    "2. 율동적 회전(Rhythmic Rotation) 및 지속적 신장",
+                    "3. 고강도 저항 운동",
+                    "4. 얼음찜질 30분 이상 적용",
+                    "5. 전기 자극으로 강한 수축 유발"
+                ],
+                correctIndex: 1,
+                explanation: "경직을 이완시키기 위해서는 부드러운 <strong>'율동적 회전'</strong>과 천천히 지속적으로 늘려주는 신장 기법이 효과적입니다."
+            },
+
+            // ==========================================
+            // 4. ATAXIA & CEREBELLAR - 4 Cases
+            // ==========================================
+            {
+                id: "ataxia_1",
+                category: "Cerebellar Ataxia",
+                symptoms: "물컵을 잡으려 할 때 손이 목표물에 가까워질수록 심하게 떨린다. (Intention Tremor)",
+                goal: "근위부 안정화 및 떨림 제어",
+                options: [
+                    "1. 율동적 안정화 (Rhythmic Stabilization)",
+                    "2. 동적 반전 (Dynamic Reversals)",
+                    "3. 반복 수축 (Repeated Contractions)",
+                    "4. 수축-이완 (Contract-Relax)",
+                    "5. 율동적 개시 (Rhythmic Initiation)"
+                ],
+                correctIndex: 0,
+                explanation: "의도 진전(Intention Tremor) 시에는 어깨/팔꿈치 등 근위 관절에 압박(Approximation)과 저항을 주어 <strong>'율동적 안정화'</strong>를 시행하는 것이 좋습니다."
+            },
+            {
+                id: "ataxia_2",
+                category: "Cerebellar Ataxia",
+                symptoms: "빠른 교대 운동(손바닥 뒤집기 등)을 수행하지 못하고 움직임이 둔하다. (Dysdiadochokinesia)",
+                goal: "길항근 교대 능력 증진",
+                options: [
+                    "1. 등척성 수축 유지 (Hold)",
+                    "2. 동적 반전 (Dynamic Reversals) - 속도 점진적 증가",
+                    "3. 수동적 관절 운동",
+                    "4. 율동적 회전 (Rhythmic Rotation)",
+                    "5. 타이밍 훈련 (Timing for Emphasis)"
+                ],
+                correctIndex: 1,
+                explanation: "반복적인 교대 운동 장애에는 주동근/길항근을 빠르게 전환하는 <strong>'동적 반전'</strong> 훈련을 느린 속도에서 빠른 속도로 진행합니다."
+            },
+            {
+                id: "ataxia_3",
+                category: "Cerebellar Ataxia",
+                symptoms: "서 있는 자세에서 발을 넓게 벌리고(Wide base), 눈을 떠도 몸이 흔들린다.",
+                goal: "자세 조절 및 균형 훈련",
+                options: [
+                    "1. 눈을 감고 한 발로 서기",
+                    "2. 롬버그(Romberg) 테스트 자세 훈련",
+                    "3. 프렌켈 운동(Frenkel's Exercises) - 시각적 보상",
+                    "4. 푹신한 매트 위에서 걷기",
+                    "5. 암실에서 보행 훈련"
+                ],
+                correctIndex: 2,
+                explanation: "소뇌성 실조는 고유수용성 감각 저하를 <strong>시각 정보</strong>로 보상해야 합니다. 발의 위치를 눈으로 확인하며 걷는 <strong>'프렌켈 운동'</strong>이 대표적입니다."
+            },
+            {
+                id: "ataxia_4",
+                category: "Sensory Ataxia",
+                symptoms: "롬버그 검사 시 눈을 뜨면 균형을 잡지만, 눈을 감으면 넘어진다. (Positive Romberg)",
+                goal: "감각 통합 및 균형 훈련",
+                options: [
+                    "1. 시각 차단 후 고유수용성 감각 훈련 집중",
+                    "2. 시각에만 전적으로 의존하는 훈련",
+                    "3. 휠체어 사용만 권장",
+                    "4. 청각적 자극만 사용",
+                    "5. 경추 보조기 착용"
+                ],
+                correctIndex: 0,
+                explanation: "눈을 감았을 때 균형을 잃는 것은 고유수용성 감각(Spinocerebellar tract) 등의 문제인 감각성 실조입니다. 점진적으로 시각을 차단하고 <strong>발바닥/관절 감각에 집중하는 훈련</strong>이 필요합니다."
+            },
+
+            // ==========================================
+            // 5. OTHER CONDITIONS (TBI, GBS, ALS, Facial) - 7 Cases
+            // ==========================================
+            {
+                id: "facial_1",
+                category: "Bell's Palsy",
+                symptoms: "우측 얼굴 마비. 이마 주름잡기가 안 되고 눈이 감기지 않는다. (LMNL)",
+                goal: "안면 근육 재교육",
+                options: [
+                    "1. 거울을 이용한 시각적 바이오피드백 & PNF",
+                    "2. 안대 착용 후 휴식",
+                    "3. 얼굴 근육의 강한 신장(Stretching)",
+                    "4. 고강도 껌 씹기 훈련",
+                    "5. 수술적 치료만 고려"
+                ],
+                correctIndex: 0,
+                explanation: "말초성 안면마비는 거울을 보며(Feedback) 정확한 움직임을 유도하고, 손가락으로 저항/보조를 주는 <strong>'얼굴 PNF'</strong>가 효과적입니다."
+            },
+            {
+                id: "tbi_1",
+                category: "TBI (Rancho Level IV)",
+                symptoms: "외상성 뇌손상 환자가 혼란스럽고 초조해하며(Confused-Agitated), 치료사에게 공격적인 성향을 보인다.",
+                goal: "행동 수정 및 과제 수행 유도",
+                options: [
+                    "1. 복잡하고 어려운 과제를 주어 집중시킨다.",
+                    "2. 환자를 침대에 묶어 둔다.",
+                    "3. 단순하고 자동적인 활동(걷기, 공 던지기)을 유도한다.",
+                    "4. 치료사가 엄격하게 훈계한다.",
+                    "5. 인지 치료 학습지 풀기"
+                ],
+                correctIndex: 2,
+                explanation: "Rancho Level IV 단계에서는 새로운 학습이 불가능합니다. 흥미를 유발할 수 있는 <strong>단순하고 자동적인 활동</strong>을 짧게 식히는 것이 좋습니다."
+            },
+            {
+                id: "tbi_2",
+                category: "TBI (Glasgow Coma Scale)",
+                symptoms: "GCS 평가: 눈뜨기(소리에 반응 3점), 언어(혼란된 대화 4점), 운동(통증에 회피 4점). 총 11점.",
+                goal: "손상 정도 분류에 따른 중재",
+                options: [
+                    "1. 경증(Mild) - 즉시 퇴원",
+                    "2. 중등도(Moderate) - 재활 치료 시작",
+                    "3. 중증(Severe) - 혼수 상태 관리",
+                    "4. 뇌사 상태",
+                    "5. 식물인간 상태"
+                ],
+                correctIndex: 1,
+                explanation: "GCS 9~12점은 <strong>중등도(Moderate)</strong> 뇌손상으로 분류되며, 적극적인 재활 치료가 필요한 단계입니다."
+            },
+            {
+                id: "gbs_1",
+                category: "GBS (Acute)",
+                symptoms: "급성기 길랭-바레 증후군. 하지에서 상지로 마비가 진행되며 호흡 곤란이 있다.",
+                goal: "합병증 예방 및 호흡 관리",
+                options: [
+                    "1. 고강도 저항 운동",
+                    "2. 호흡 물리치료 및 수동 관절 운동(PROM)",
+                    "3. 기립 경사대(Tilting table) 훈련 1시간",
+                    "4. 복부 근육 강화 운동",
+                    "5. 짐볼 위에서 균형 훈련"
+                ],
+                correctIndex: 1,
+                explanation: "급성기 GBS는 호흡근 마비 위험이 크므로 <strong>호흡 관리</strong>가 최우선이며, 과도한 피로는 금물이므로 부드러운 수동 운동으로 구축을 예방합니다."
+            },
+            {
+                id: "gbs_2",
+                category: "GBS (Recovery)",
+                symptoms: "회복기 단계. 근력은 점차 돌아오고 있으나 쉽게 피로를 느낀다.",
+                goal: "근피로(Overwork weakness) 없는 근력 강화",
+                options: [
+                    "1. 고중량 저반복(High Weight) 웨이트 트레이닝",
+                    "2. 탈진할 때까지 유산소 운동",
+                    "3. 등장성 수축의 결합(Combination of Isotonics) - 저강도",
+                    "4. 휴식 없이 1시간 이상 운동",
+                    "5. 점프 훈련"
+                ],
+                correctIndex: 2,
+                explanation: "GBS 환자는 운동 단위가 손상되어 있어 과도한 운동 시 영구적 근손상(Overwork weakness)이 올 수 있습니다. <strong>저강도, 빈번한 휴식</strong>이 핵심입니다."
+            },
+            {
+                id: "als_1",
+                category: "ALS (Early)",
+                symptoms: "루게릭병(ALS) 초기. 손의 내재근 위축으로 정밀한 동작이 어렵다.",
+                goal: "기능 유지 및 에너지 보존",
+                options: [
+                    "1. 피로를 유발하지 않는 범위 내의 가벼운 운동",
+                    "2. 퇴행을 막기 위한 고강도 극기 훈련",
+                    "3. 침상 안정만 취함",
+                    "4. 전기 자극으로 강제 근수축",
+                    "5. 신경 차단술"
+                ],
+                correctIndex: 0,
+                explanation: "ALS는 진행성 질환이므로 <strong>에너지 보존</strong> 원칙하에 남아있는 기능을 유지하는 가벼운 운동이 권장됩니다."
+            },
+            {
+                id: "pnf_gen_1",
+                category: "PNF Pattern (UE)",
+                symptoms: "환자가 밥을 먹기 위해 숟가락을 입으로 가져오는 동작(Hand to Mouth)이 어렵다.",
+                goal: "기능적 패턴 훈련",
+                options: [
+                    "1. D1 Flexion (굴곡-내전-외회전)",
+                    "2. D1 Extension (신전-외전-내회전)",
+                    "3. D2 Flexion (굴곡-외전-외회전)",
+                    "4. D2 Extension (신전-내전-내회전)",
+                    "5. 양손 푸쉬업"
+                ],
+                correctIndex: 0,
+                explanation: "반대편 귀/입으로 손을 가져오는 패턴은 PNF 상지 <strong>D1 Flexion (굽힘-모음-가쪽돌림)</strong> 패턴과 유사하여 식사 동작 훈련에 응용됩니다."
+            }
+        ];
+
+        // Verify count logic
+        // Total Cases in code: 8 (Stroke) + 5 (PD) + 6 (SCI) + 4 (Ataxia) + 7 (Others) = 30 Cases.
+        // Perfect for Random 10 Selection.
+
+        const game = {
+            // ... (Game Logic remains the same)
+            currentStageIndex: 0,
+            score: 0,
+            maxScore: 100,
+            rawScore: 0,
+            currentScenario: null,
+
+            pointsCorrect: 10,
+            pointsWrong: -5,
+            totalQuestionsToPlay: 10,
+            playedScenarioIds: [],
+
+            startGame: function () {
+                this.currentStageIndex = 0;
+                this.rawScore = 0;
+                this.playedScenarioIds = [];
+                this.score = 0;
+                this.showScreen('game-screen');
+                this.currentScenario = null;
+                this.nextStage();
+            },
+
+            getRandomScenario: function () {
+                // Filter out played scenarios
+                const available = scenarioData.filter(s => !this.playedScenarioIds.includes(s.id));
+                if (available.length === 0) return null; // No more unique scenarios (should not happen with 30 items for 10 q)
+
+                const randomIndex = Math.floor(Math.random() * available.length);
+                return available[randomIndex];
+            },
+
+            renderStage: function () {
+                if (!this.currentScenario) {
+                    this.currentScenario = this.getRandomScenario();
+                    if (!this.currentScenario) {
+                        this.finishGame();
+                        return;
+                    }
+                    this.playedScenarioIds.push(this.currentScenario.id);
+                }
+
+                const stage = this.currentScenario;
+                const currentCount = this.playedScenarioIds.length;
+
+                // UI Updates
+                const badge = document.getElementById('diagnosis-badge');
+                badge.textContent = stage.category;
+
+                document.getElementById('feedback-area').style.display = 'none';
+                const assessArea = document.getElementById('assessment-area');
+                assessArea.style.pointerEvents = 'auto';
+                assessArea.style.opacity = '1';
+
+                const percent = ((currentCount - 1) / this.totalQuestionsToPlay) * 100;
+                document.getElementById('progress-fill').style.width = `${percent}%`;
+                document.getElementById('case-number').textContent = `Case ${currentCount}/${this.totalQuestionsToPlay}`;
+
+                document.getElementById('p-symptoms').innerHTML = stage.symptoms;
+                document.getElementById('p-goal').innerHTML = stage.goal;
+
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+
+                stage.options.forEach((optText, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-outline';
+                    btn.textContent = optText;
+                    btn.onclick = () => this.checkAnswer(index);
+                    optionsContainer.appendChild(btn);
+                });
+            },
+
+            checkAnswer: function (selectedIndex) {
+                const stage = this.currentScenario;
+                const isCorrect = selectedIndex === stage.correctIndex;
+
+                if (isCorrect) {
+                    this.rawScore += this.pointsCorrect;
+                } else {
+                    this.rawScore += this.pointsWrong;
+                }
+
+                this.showFeedback(isCorrect, stage.explanation);
+            },
+
+            showFeedback: function (isCorrect, explanation) {
+                const feedbackArea = document.getElementById('feedback-area');
+                const feedbackTitle = document.getElementById('feedback-title');
+                const feedbackText = document.getElementById('feedback-text');
+                const nextBtn = document.getElementById('next-btn');
+                const assessmentArea = document.getElementById('assessment-area');
+
+                assessmentArea.style.pointerEvents = 'none';
+                assessmentArea.style.opacity = '0.7';
+
+                feedbackArea.style.display = 'block';
+
+                if (isCorrect) {
+                    feedbackArea.className = 'feedback-area';
+                    feedbackTitle.innerHTML = '<span class="success-text">✅ 정답입니다!</span>';
+                    feedbackText.innerHTML = explanation;
+                    nextBtn.style.display = 'inline-block';
+                } else {
+                    feedbackArea.className = 'feedback-area error';
+                    feedbackTitle.innerHTML = '<span class="error-text">❌ 오답입니다.</span>';
+                    feedbackText.innerHTML = `<strong>해설:</strong> ${explanation}`;
+                    nextBtn.style.display = 'inline-block';
+                }
+            },
+
+            nextStage: function () {
+                if (document.getElementById('feedback-area').style.display !== 'none' && this.playedScenarioIds.length >= this.totalQuestionsToPlay) {
+                    this.finishGame();
+                    return;
+                }
+                this.currentScenario = null;
+                this.renderStage();
+            },
+
+            finishGame: function () {
+                this.showScreen('result-screen');
+
+                const totalPlayed = this.playedScenarioIds.length;
+                const maxPossible = totalPlayed * this.pointsCorrect;
+                let finalPercent = 0;
+                if (maxPossible > 0) {
+                    finalPercent = Math.round((this.rawScore / maxPossible) * 100);
+                }
+                if (finalPercent < 0) finalPercent = 0;
+
+                document.getElementById('final-score').textContent = finalPercent;
+
+                const gradeBadge = document.getElementById('final-grade');
+                const resultMsg = document.getElementById('result-message');
+
+                if (finalPercent >= 90) {
+                    gradeBadge.textContent = "🏆 1등급: PNF 마스터";
+                    gradeBadge.className = "grade-badge grade-A";
+                    resultMsg.textContent = "완벽합니다! 임상 전문가 수준의 추론 능력입니다.";
+                } else if (finalPercent >= 75) {
+                    gradeBadge.textContent = "🥈 2등급: 우수 치료사";
+                    gradeBadge.className = "grade-badge grade-B";
+                    resultMsg.textContent = "훌륭합니다. 사소한 실수만 보완하면 완벽할 것입니다.";
+                } else {
+                    gradeBadge.textContent = "🥉 3등급: 노력 요망";
+                    gradeBadge.className = "grade-badge grade-C";
+                    resultMsg.textContent = "기초 이론 학습이 더 필요합니다. 신경계 물리치료학 교과서를 참고하세요.";
+                }
+            },
+
+            restartGame: function () {
+                this.startGame();
+            },
+
+            showScreen: function (screenId) {
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+            }
+        };
+    </script>
+
+</body>
+
+</html>
